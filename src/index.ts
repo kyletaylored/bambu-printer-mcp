@@ -13,6 +13,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
 import fs from "fs";
+import os from "node:os";
 import path from "path";
 import { createServer as createHttpServer, type IncomingMessage, type Server as HttpServer, type ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
@@ -31,12 +32,32 @@ import { BambuImplementation } from "./printers/bambu.js";
 
 dotenv.config();
 
+// Surface crashes to stderr before the process dies. Without these, an
+// uncaught exception or rejected promise anywhere in the process (including
+// from fire-and-forget MQTT/timer callbacks) silently kills the server with
+// no diagnostic output, which is exactly what Claude Desktop's "Server
+// transport closed unexpectedly" log shows when this fires.
+process.on("uncaughtException", (err) => {
+  console.error("[bambu-printer-mcp] uncaughtException:", err?.stack || err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error(
+    "[bambu-printer-mcp] unhandledRejection:",
+    reason instanceof Error ? reason.stack : reason
+  );
+});
+
 const DEFAULT_HOST = process.env.BAMBU_PRINTER_HOST || process.env.PRINTER_HOST || "localhost";
 const DEFAULT_BAMBU_SERIAL = process.env.BAMBU_PRINTER_SERIAL || process.env.BAMBU_SERIAL || "";
 const DEFAULT_BAMBU_TOKEN =
   process.env.BAMBU_PRINTER_ACCESS_TOKEN || process.env.BAMBU_TOKEN || "";
 const DEFAULT_BAMBU_DEV_ID = process.env.BAMBU_DEV_ID || DEFAULT_BAMBU_SERIAL;
-const TEMP_DIR = process.env.TEMP_DIR || path.join(process.cwd(), "temp");
+// os.tmpdir(), not process.cwd() — a packaged Claude Desktop extension is
+// spawned with a cwd we don't control (and may not be writable), so a
+// cwd-relative default here can throw at module load via the mkdirSync
+// below and kill the server before it ever opens the stdio transport.
+const TEMP_DIR = process.env.TEMP_DIR || path.join(os.tmpdir(), "bambu-printer-mcp");
 
 // Printer model and bed type
 const DEFAULT_BAMBU_MODEL =

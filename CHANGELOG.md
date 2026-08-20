@@ -5,6 +5,9 @@
 ### Added
 - **Claude Desktop extension (`.mcpb`) packaging.** Added `manifest.json` (with `user_config` prompts for printer host, serial, LAN access code, and model) and `.mcpbignore` so the server can be installed via drag-and-drop into Claude Desktop instead of hand-editing JSON config. New `npm run package:mcpb` script builds, prunes dev dependencies, and packs the bundle; `.github/workflows/release-mcpb.yml` builds and attaches `bambu-printer-mcp.mcpb` to tagged GitHub releases, mirroring the existing npm publish workflow.
 
+### Fixed
+- **Server crashed on startup when launched as a Claude Desktop `.mcpb` extension.** `TEMP_DIR` defaulted to `path.join(process.cwd(), "temp")`, but a packaged extension is spawned with a `cwd` we don't control and that may not be writable, so the module-load-time `mkdirSync` threw and killed the process before it ever opened the stdio transport — visible in Claude Desktop's logs only as "Server transport closed unexpectedly" moments after `initialize`, with no stack trace. `TEMP_DIR` now defaults to `path.join(os.tmpdir(), "bambu-printer-mcp")`, which is always writable regardless of the spawn `cwd`. Also added top-level `uncaughtException`/`unhandledRejection` handlers that log the full stack to stderr so future crashes are diagnosable from the Claude Desktop log instead of failing silently.
+
 ### Security
 - Per-call `slicer_path`, `ffmpeg_path`, and `bridge_command` executable selectors are now rejected by default. Trusted server-side environment configuration remains available, including `FFMPEG_PATH` for RTSP camera snapshots; set `MCP_ALLOW_EXECUTABLE_ARG=1` only when intentional per-call overrides are required. `MCP_ALLOW_BRIDGE_COMMAND_ARG` remains a compatibility alias for `bridge_command` only.
 
