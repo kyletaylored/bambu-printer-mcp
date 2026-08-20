@@ -1,0 +1,49 @@
+# Dev-only files that shouldn't ship in the extension bundle.
+
+# Source control / CI
+.git/
+.github/
+.gitignore
+
+# Reference / doc-only material not needed at runtime
+docs/
+README.md
+CHANGELOG.md
+AGENTS.md
+CLAUDE.md
+PROGRESS.md
+REMOTE-DEPLOYMENT.md
+SPEC-CHECKLIST.md
+LICENSE
+
+# Agent / IDE configs
+.claude/
+.vscode/
+.idea/
+.cursor/
+
+# TypeScript sources (dist/ is what actually runs)
+src/
+tsconfig.json
+*.tsbuildinfo
+
+# Tests
+test/
+tests/
+
+# Env / local secrets
+.env
+.env.local
+.env.example
+
+# Caches / build junk
+node_modules/.cache/
+coverage/
+*.log
+npm-debug.log
+
+# OS junk
+.DS_Store
+
+# Packed bundle itself
+*.mcpb

@@ -273,6 +273,25 @@ Where this config lives depends on your client:
 
 Restart your client after editing the config.
 
+### Alternative: Claude Desktop extension (.mcpb)
+
+You can install this server into Claude Desktop without editing JSON by using the `.mcpb` extension bundle. Download `bambu-printer-mcp.mcpb` from the [latest release](https://github.com/DMontgomery40/bambu-printer-mcp/releases), double-click it, and Claude Desktop's extension wizard will register the server. You'll be prompted for your printer IP, serial number, LAN access code, and printer model -- the same values as the `mcpServers` config above.
+
+If your org has disabled Claude Desktop extension installs, install unpacked instead:
+
+1. Clone the repo and run `npm ci && npm run build`.
+2. Open Claude Desktop -> **Settings** -> **Extensions** -> **Advanced Settings** -> **Extension Developer** -> **Install Unpacked**.
+3. Select the repo's root directory (the one containing `manifest.json`).
+
+To build the bundle yourself instead of downloading a release asset:
+
+```bash
+npm install -g @anthropic-ai/mcpb
+npm run package:mcpb
+```
+
+This produces `bambu-printer-mcp.mcpb` in the repo root.
+
 ### Recommended: use with codemode-mcp
 
 For any MCP server with a large tool surface, wrapping it behind [codemode-mcp](https://github.com/jx-codes/codemode-mcp) dramatically reduces token usage. Instead of exposing every tool definition to the model (which can consume tens of thousands of tokens per turn), codemode lets the agent write code against a two-tool interface (`search()` and `execute()`), loading only the tools it needs on demand.

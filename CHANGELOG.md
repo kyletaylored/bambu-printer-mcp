@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- **Claude Desktop extension (`.mcpb`) packaging.** Added `manifest.json` (with `user_config` prompts for printer host, serial, LAN access code, and model) and `.mcpbignore` so the server can be installed via drag-and-drop into Claude Desktop instead of hand-editing JSON config. New `npm run package:mcpb` script builds, prunes dev dependencies, and packs the bundle; `.github/workflows/release-mcpb.yml` builds and attaches `bambu-printer-mcp.mcpb` to tagged GitHub releases, mirroring the existing npm publish workflow.
+
 ### Security
 - Per-call `slicer_path`, `ffmpeg_path`, and `bridge_command` executable selectors are now rejected by default. Trusted server-side environment configuration remains available, including `FFMPEG_PATH` for RTSP camera snapshots; set `MCP_ALLOW_EXECUTABLE_ARG=1` only when intentional per-call overrides are required. `MCP_ALLOW_BRIDGE_COMMAND_ARG` remains a compatibility alias for `bridge_command` only.
 
